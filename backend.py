@@ -24,11 +24,13 @@ ORDERS: list[dict] = []
 
 import urllib.request
 import urllib.error
+import os
 
 def load_seed_data():
     """Fetch startup data dynamically from the external API instead of a local file."""
     try:
-        req = urllib.request.Request("http://127.0.0.1:8001/api/external/orders")
+        api_url = os.environ.get("DATA_API_URL", "http://127.0.0.1:8001/api/external/orders")
+        req = urllib.request.Request(api_url)
         with urllib.request.urlopen(req, timeout=3) as response:
             payload = json.loads(response.read().decode())
             for o in payload.get("formData", []):

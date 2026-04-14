@@ -33,11 +33,12 @@ docker-compose up --build -d
 ```
 
 This starts:
-| Service    | URL                        | Notes                        |
-|------------|----------------------------|------------------------------|
-| FastAPI    | http://localhost:8000      | API + metrics + WebSocket    |
-| Prometheus | http://localhost:9090      | Metric storage               |
-| Grafana    | http://localhost:3000      | Dashboards (auto-provisioned)|
+| Service       | URL                        | Notes                        |
+|---------------|----------------------------|------------------------------|
+| REST API      | http://localhost:8000      | API + metrics + WebSocket    |
+| Data API      | http://localhost:8001      | Mock decoupled data provider |
+| Prometheus    | http://localhost:9090      | Metric storage               |
+| Grafana       | http://localhost:3000      | Dashboards (auto-provisioned)|
 
 ### 3. Open Grafana
 - URL: http://localhost:3000
@@ -56,9 +57,15 @@ Open `textile_dashboard_live.html` in a browser.
 ## Run Without Docker (Dev Mode)
 
 ```bash
-pip install fastapi uvicorn websockets
+pip install fastapi uvicorn websockets requests
+
+# In Terminal 1 (Start the Data DB API):
+python mock_external_api.py
+
+# In Terminal 2 (Start the Main Backend):
 python backend.py
-# Server starts at http://localhost:8000
+
+# Both servers are required. The main Backend starts at http://localhost:8000
 ```
 
 ---
@@ -110,12 +117,13 @@ async def get_orders():
 ## Files
 ```
 textile_realtime/
-├── backend.py                          # FastAPI app
+├── backend.py                          # FastAPI app (Client Facing)
+├── mock_external_api.py                # Simulated Decoupled Data Interface
 ├── requirements.txt
 ├── Dockerfile.api
 ├── docker-compose.yml
 ├── prometheus.yml
-├── data2.json                          # seed data
+├── data2.json                          # seed data payload
 ├── textile_dashboard_live.html         # upgraded live frontend
 └── grafana/
     └── provisioning/

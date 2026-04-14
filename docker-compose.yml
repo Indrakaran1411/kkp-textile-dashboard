@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+
+  # ── 1. Your FastAPI backend ─────────────────────────────────────────────────
+  textile-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: textile_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data2.json:/app/data2.json:ro   # seed data (read-only)
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ── 2. Prometheus ────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: textile_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"           # allows hot-reload via POST /-/reload
+    restart: unless-stopped
+    depends_on:
+      - textile-api
+
+  # ── 3. Grafana ───────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: textile_grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=textile123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/textile.json
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
+  grafana_data:

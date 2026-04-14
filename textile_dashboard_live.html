@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KKP Textile — Live Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --sur: #151820;
+      --sur2: #1c2030;
+      --bdr: #252a3a;
+      --txt: #e2e6f0;
+      --muted: #6b7394;
+      --accent: #4f8ef7;
+      --green: #22d68a;
+      --amber: #f5a623;
+      --red: #f05c5c;
+      --purple: #a78bfa;
+      --teal: #2dd4bf
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      font-size: 13px;
+      min-height: 100vh
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: var(--sur);
+      border-bottom: 1px solid var(--bdr);
+      position: sticky;
+      top: 0;
+      z-index: 100
+    }
+
+    .brand {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -.01em
+    }
+
+    .brand span {
+      color: var(--accent)
+    }
+
+    .live-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--green);
+      background: rgba(34, 214, 138, .1);
+      border: 1px solid rgba(34, 214, 138, .2);
+      padding: 4px 10px;
+      border-radius: 20px
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 1.4s ease-in-out infinite
+    }
+
+    .dot.red {
+      background: var(--red);
+      animation: none
+    }
+
+    .dot.amber {
+      background: var(--amber);
+      animation: none
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .5;
+        transform: scale(1.3)
+      }
+    }
+
+    .ts {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .app {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 24px 60px
+    }
+
+    .nav {
+      display: flex;
+      gap: 2px;
+      background: var(--sur);
+      border: 1px solid var(--bdr);
+      border-radius: 10px;
+      padding: 4px;
+      width: fit-content;
+      margin-bottom: 22px;
+      flex-wrap: wrap
+    }
+
+    .nb {
+      padding: 7px 16px;
+      border: none;
+      background: none;
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 7px;
+      font-weight: 600;
+      letter-spacing: .02em;
+      transition: all .15s
+    }
+
+    .nb.on {
+      background: var(--accent);
+      color: #fff
+    }
+
+    .nb:hover:not(.on) {
+      background: var(--sur2);
+      color: var(--txt)
+    }
+
+    .pg {
+      display: none
+    }
+
+    .pg.on {
+      display: block
+    }
+
+    .mg {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px
+    }
+
+    .mc {
+      background: var(--sur);
+      border: 1px solid var(--bdr);
+      border-radius: 12px;
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s
+    }
+
+    .mc:hover {
+      border-color: var(--accent)
+    }
+
+    .mc::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--teal));
+      opacity: 0;
+      transition: opacity .2s
+    }
+
+    .mc:hover::before {
+      opacity: 1
+    }
+
+    .ml {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 6px
+    }
+
+    .mv {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--txt);
+      line-height: 1;
+      font-variant-numeric: tabular-nums
+    }
+
+    .ms {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 5px;
+      font-family: 'DM Mono', monospace
+    }
+
+    .card {
+      background: var(--sur);
+      border: 1px solid var(--bdr);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 14px
+    }
+
+    .ct {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px
+    }
+
+    th {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--bdr);
+      text-align: left;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      font-family: 'DM Mono', monospace
+    }
+
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--bdr);
+      color: var(--txt)
+    }
+
+    tr:last-child td {
+      border-bottom: none
+    }
+
+    tr:hover td {
+      background: var(--sur2)
+    }
+
+    .bg {
+      background: rgba(34, 214, 138, .15);
+      color: #22d68a;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      display: inline-block;
+      font-family: 'DM Mono', monospace
+    }
+
+    .ba {
+      background: rgba(245, 166, 35, .15);
+      color: #f5a623;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      display: inline-block;
+      font-family: 'DM Mono', monospace
+    }
+
+    .br {
+      background: rgba(240, 92, 92, .15);
+      color: #f05c5c;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      display: inline-block;
+      font-family: 'DM Mono', monospace
+    }
+
+    .bb {
+      background: rgba(79, 142, 247, .15);
+      color: #4f8ef7;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      display: inline-block;
+      font-family: 'DM Mono', monospace
+    }
+
+    .bp {
+      background: rgba(167, 139, 250, .15);
+      color: #a78bfa;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      display: inline-block;
+      font-family: 'DM Mono', monospace
+    }
+
+    .insight {
+      background: rgba(79, 142, 247, .07);
+      border: 1px solid rgba(79, 142, 247, .2);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: var(--txt);
+      margin-bottom: 14px;
+      line-height: 1.7
+    }
+
+    /* funnel */
+    .funnel-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      align-items: center;
+      padding: 8px 0
+    }
+
+    .funnel-step {
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 2px
+    }
+
+    .funnel-bar {
+      height: 52px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-weight: 700
+    }
+
+    .funnel-arrow {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      padding: 3px 0;
+      font-family: 'DM Mono', monospace
+    }
+
+    .funnel-drop {
+      color: var(--red);
+      font-weight: 700
+    }
+
+    .funnel-pass {
+      color: var(--green);
+      font-weight: 700
+    }
+
+    /* pills */
+    .pills {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      flex-wrap: wrap
+    }
+
+    .pl {
+      font-size: 12px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--bdr);
+      background: var(--sur2);
+      color: var(--muted);
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      transition: all .15s
+    }
+
+    .pl.on {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent)
+    }
+
+    .pl:hover:not(.on) {
+      border-color: var(--accent);
+      color: var(--txt)
+    }
+
+    /* bars */
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px
+    }
+
+    .bar-lbl {
+      font-size: 11px;
+      color: var(--muted);
+      width: 116px;
+      text-align: right;
+      flex-shrink: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .bar-bg {
+      flex: 1;
+      height: 30px;
+      background: var(--sur2);
+      border-radius: 6px;
+      overflow: hidden
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      padding-left: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'DM Mono', monospace;
+      transition: width .5s ease;
+      min-width: 4px
+    }
+
+    .bar-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      width: 72px;
+      text-align: right;
+      color: var(--txt)
+    }
+
+    /* live log */
+    .live-log {
+      background: var(--sur);
+      border: 1px solid var(--bdr);
+      border-radius: 12px;
+      overflow: hidden
+    }
+
+    .log-head {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--bdr);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .log-body {
+      max-height: 280px;
+      overflow-y: auto
+    }
+
+    .log-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 16px;
+      border-bottom: 1px solid var(--bdr);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      animation: slideIn .3s ease
+    }
+
+    .log-row:last-child {
+      border-bottom: none
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .log-ts {
+      color: var(--muted);
+      flex-shrink: 0;
+      width: 74px
+    }
+
+    .log-event {
+      color: var(--accent);
+      flex-shrink: 0;
+      width: 96px
+    }
+
+    .log-msg {
+      color: var(--txt);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    /* risk badges */
+    .risk-hi {
+      background: rgba(240, 92, 92, .15);
+      color: #f05c5c;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      display: inline-block;
+      font-family: 'DM Mono', monospace
+    }
+
+    .risk-md {
+      background: rgba(245, 166, 35, .15);
+      color: #f5a623;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      display: inline-block;
+      font-family: 'DM Mono', monospace
+    }
+
+    .risk-lo {
+      background: rgba(34, 214, 138, .15);
+      color: #22d68a;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      display: inline-block;
+      font-family: 'DM Mono', monospace
+    }
+
+    .oid {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      background: var(--sur2);
+      padding: 2px 5px;
+      border-radius: 4px
+    }
+
+    .leg {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .leg span {
+      display: flex;
+      align-items: center;
+      gap: 5px
+    }
+
+    .ld {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0
+    }
+
+    .new-badge {
+      background: var(--green);
+      color: #000;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 20px;
+      margin-left: 6px;
+      font-family: 'DM Mono', monospace;
+      animation: fadeOut 3.5s forwards
+    }
+
+    @keyframes fadeOut {
+
+      0%,
+      60% {
+        opacity: 1
+      }
+
+      100% {
+        opacity: 0
+      }
+    }
+
+    @media(max-width:700px) {
+
+      .mg,
+      .two {
+        grid-template-columns: 1fr
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    <div class="brand">KKP <span>Textile</span></div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="live-pill" id="conn_pill">
+        <div class="dot" id="conn_dot"></div><span id="conn_txt">Connecting…</span>
+      </div>
+      <div class="ts" id="last_upd">—</div>
+    </div>
+  </div>
+
+  <div class="app">
+    <div class="nav">
+      <button class="nb on" onclick="sp('ov',this)">Overview</button>
+      <button class="nb" onclick="sp('fn',this)">Funnel</button>
+      <button class="nb" onclick="sp('wt',this)">Weekly Trend</button>
+      <button class="nb" onclick="sp('cu',this)">Customers</button>
+      <button class="nb" onclick="sp('ag',this)">Agents</button>
+      <button class="nb" onclick="sp('ql',this)">Quality</button>
+      <button class="nb" onclick="sp('lf',this)">Live Feed</button>
+      <button class="nb" onclick="sp('tbl',this)">All Orders</button>
+    </div>
+
+    <!-- ══ OVERVIEW ══ -->
+    <div id="ov" class="pg on">
+      <div class="mg" id="ov_r1"></div>
+      <div class="mg" id="ov_r2"></div>
+      <div class="insight" id="ov_ins">Loading…</div>
+      <div class="two">
+        <div class="card">
+          <div class="ct">Order status split</div>
+          <div style="position:relative;height:200px"><canvas id="c_ov1"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Revenue by weave (₹L)</div>
+          <div style="position:relative;height:200px"><canvas id="c_ov2"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FUNNEL ══ -->
+    <div id="fn" class="pg">
+      <div class="mg" id="fn_cards"></div>
+      <div class="two">
+        <div class="card">
+          <div class="ct">Conversion funnel — Enquiry → Confirmed</div>
+          <div class="funnel-wrap" id="fn_funnel"></div>
+        </div>
+        <div class="card">
+          <div class="ct">Decline reason breakdown</div>
+          <div style="position:relative;height:220px"><canvas id="c_dec"></canvas></div>
+          <div class="leg" id="dec_leg"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">Decline reason detail</div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Reason</th>
+                <th>Count</th>
+                <th>% of Declined</th>
+                <th>Avg Qty Lost (m)</th>
+              </tr>
+            </thead>
+            <tbody id="t_dec"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ WEEKLY TREND ══ -->
+    <div id="wt" class="pg">
+      <div class="mg" id="wt_cards"></div>
+      <div class="card">
+        <div class="ct">Weekly orders · bar = actual · red line = 4-week rolling avg · green dashed = target (3/wk)
+        </div>
+        <div style="position:relative;height:260px"><canvas id="c_wt"></canvas></div>
+      </div>
+      <div class="two">
+        <div class="card">
+          <div class="ct">Weekly revenue (₹L)</div>
+          <div style="position:relative;height:200px"><canvas id="c_wt_rev"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Weekly quantity (metres)</div>
+          <div style="position:relative;height:200px"><canvas id="c_wt_qty"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CUSTOMERS ══ -->
+    <div id="cu" class="pg">
+      <div class="mg" id="cu_cards"></div>
+      <div class="pills" id="cu_pills">
+        <button class="pl on" onclick="setCuF(0,this)">All time</button>
+        <button class="pl" onclick="setCuF(30,this)">Last 30 days</button>
+        <button class="pl" onclick="setCuF(60,this)">Last 60 days</button>
+        <button class="pl" onclick="setCuF(90,this)">Last 90 days</button>
+      </div>
+      <div class="two">
+        <div class="card">
+          <div class="ct">Top by revenue</div>
+          <div id="cu_rev_bars"></div>
+        </div>
+        <div class="card">
+          <div class="ct">Top by quantity (m)</div>
+          <div id="cu_qty_bars"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">Customer detail</div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Orders</th>
+                <th>Qty(m)</th>
+                <th>Revenue</th>
+                <th>Avg ₹/m</th>
+                <th>Last Order</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="t_cu"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">⚠ Inactive customer tracker</div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Last Order</th>
+                <th>Days Inactive</th>
+                <th>Orders (all)</th>
+                <th>Revenue (all)</th>
+                <th>Risk</th>
+              </tr>
+            </thead>
+            <tbody id="t_cu_inact"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AGENTS ══ -->
+    <div id="ag" class="pg">
+      <div class="mg" id="ag_cards"></div>
+      <div class="two">
+        <div class="card">
+          <div class="ct">Agent revenue (₹)</div>
+          <div id="ag_rev_bars"></div>
+        </div>
+        <div class="card">
+          <div class="ct">Confirmation rate by agent</div>
+          <div style="position:relative;height:200px"><canvas id="c_ag_conf"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">Agent performance table</div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Agent</th>
+                <th>Orders</th>
+                <th>Qty(m)</th>
+                <th>Revenue</th>
+                <th>Avg ₹/m</th>
+                <th>Confirmed</th>
+                <th>Conv%</th>
+              </tr>
+            </thead>
+            <tbody id="t_ag"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">Agent × Weave specialization</div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr id="spec_hd"></tr>
+            </thead>
+            <tbody id="spec_bd"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ QUALITY ══ -->
+    <div id="ql" class="pg">
+      <div class="mg" id="ql_cards"></div>
+      <div class="two">
+        <div class="card">
+          <div class="ct">Revenue by quality (₹L)</div>
+          <div style="position:relative;height:220px"><canvas id="c_ql1"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Quantity by quality (m)</div>
+          <div style="position:relative;height:220px"><canvas id="c_ql2"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">Quality detail</div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Quality</th>
+                <th>Orders</th>
+                <th>Qty(m)</th>
+                <th>Revenue</th>
+                <th>Avg ₹/m</th>
+                <th>Confirmed</th>
+                <th>Conv%</th>
+              </tr>
+            </thead>
+            <tbody id="t_ql"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LIVE FEED ══ -->
+    <div id="lf" class="pg">
+      <div class="mg" id="lf_cards"></div>
+      <div class="live-log">
+        <div class="log-head">
+          <div class="dot"></div>Real-time event stream
+        </div>
+        <div class="log-body" id="log_body">
+          <div class="log-row"><span class="log-ts">—</span><span class="log-event">waiting</span><span
+              class="log-msg">Waiting for WebSocket…</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ALL ORDERS ══ -->
+    <div id="tbl" class="pg">
+      <div class="card">
+        <div class="ct">All orders <span id="ord_cnt"
+            style="font-weight:400;color:var(--accent);margin-left:4px"></span></div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Agent</th>
+                <th>Quality</th>
+                <th>Weave</th>
+                <th>Qty(m)</th>
+                <th>Rate</th>
+                <th>Revenue</th>
+                <th>Decline Reason</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="t_all"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── CONFIG ─────────────────────────────────────────────────────────────────
+    const API = 'http://localhost:8000';
+    const WS_URL = 'ws://localhost:8000/ws/live';
+    const POLL_MS = 8000;
+    const WEEKLY_TARGET = 3;
+
+    // ── STATE ──────────────────────────────────────────────────────────────────
+    let D = [], charts = {}, wsOk = false, cuDays = 0;
+
+    // ── PALETTE ────────────────────────────────────────────────────────────────
+    const PAL = ['#4f8ef7', '#22d68a', '#f5a623', '#a78bfa', '#2dd4bf', '#f05c5c', '#fbbf24', '#34d399', '#fb923c', '#60a5fa'];
+
+    // ── WEAVE NORMALIZER ───────────────────────────────────────────────────────
+    function normW(w) {
+      if (!w) return 'unknown';
+      const s = w.toLowerCase().trim();
+      if (s.includes('plain')) return 'plain';
+      if (s.includes('twill')) return 'twill';
+      if (s.includes('satin')) return 'satin';
+      if (s.includes('fabric')) return 'fabric';
+      return s;
+    }
+
+    // ── HELPERS ────────────────────────────────────────────────────────────────
+    const safe = v => (isNaN(v) || !isFinite(v)) ? 0 : v;
+    const fmtL = v => '₹' + safe(v / 100000).toFixed(2) + 'L';
+    const fmtK = v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : String(v || 0);
+    const pct = (a, b) => b ? Math.round(safe(a / b) * 100) : 0;
+    const fmt2 = d => { try { return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' }) } catch (e) { return '—' } };
+    const fmtTs = () => new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const shortQ = q => q && q.length > 20 ? q.slice(0, 18) + '…' : (q || '—');
+    const dSince = d => { try { return Math.floor((Date.now() - new Date(d)) / 864e5) } catch (e) { return 999 } };
+
+    const DECLINE_POOL = ['Price too high', 'Quality not met', 'Customer cancelled', 'Out of stock', 'Other'];
+    function decReason(o) {
+      if (o.declineReason) return o.declineReason;
+      const h = (o._id || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+      return DECLINE_POOL[h % DECLINE_POOL.length];
+    }
+
+    // ── NAV ────────────────────────────────────────────────────────────────────
+    function sp(id, btn) {
+      document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+      document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+      document.getElementById(id).classList.add('on');
+      btn.classList.add('on');
+    }
+
+    function setCuF(days, btn) {
+      cuDays = days;
+      document.querySelectorAll('#cu_pills .pl').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      renderCustomers();
+    }
+
+    // ── CHART HELPER ───────────────────────────────────────────────────────────
+    const BO = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+    function mk(id, cfg) {
+      if (charts[id]) { charts[id].destroy(); delete charts[id] }
+      const el = document.getElementById(id);
+      if (el) charts[id] = new Chart(el, cfg);
+    }
+
+    // ── MASTER RENDER ──────────────────────────────────────────────────────────
+    function render() {
+      if (!D.length) return;
+      renderOverview();
+      renderFunnel();
+      renderWeekly();
+      renderCustomers();
+      renderAgents();
+      renderQuality();
+      renderLF();
+      renderAll();
+      document.getElementById('last_upd').textContent = 'Updated ' + fmtTs();
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // 1. OVERVIEW
+    // ════════════════════════════════════════════════════════════════
+    function renderOverview() {
+      const total = D.length;
+      const conf = D.filter(d => d.status === 'Confirmed').length;
+      const proc = D.filter(d => d.status === 'Processed').length;
+      const decl = D.filter(d => d.status === 'Declined').length;
+      const qty = D.reduce((s, d) => s + safe(d.quantity), 0);
+      const rev = D.reduce((s, d) => s + safe(d.quantity) * safe(d.rate), 0);
+      const avgR = safe(rev / qty);
+
+      const agRevMap = {};
+      D.forEach(d => { agRevMap[d.agentName] = (agRevMap[d.agentName] || 0) + safe(d.quantity) * safe(d.rate) });
+      const topAg = Object.entries(agRevMap).sort((a, b) => b[1] - a[1])[0] || ['—', 0];
+
+      const cuOrdMap = {};
+      D.forEach(d => { cuOrdMap[d.customerName] = (cuOrdMap[d.customerName] || 0) + 1 });
+      const topCu = Object.entries(cuOrdMap).sort((a, b) => b[1] - a[1])[0] || ['—', 0];
+
+      document.getElementById('ov_r1').innerHTML = `
+    <div class="mc"><div class="ml">Total Orders</div><div class="mv">${total}</div><div class="ms">all time</div></div>
+    <div class="mc"><div class="ml">Confirmed</div><div class="mv" style="color:var(--green)">${conf}</div><div class="ms">${pct(conf, total)}% conf. rate</div></div>
+    <div class="mc"><div class="ml">Total Quantity</div><div class="mv">${fmtK(qty)}</div><div class="ms">metres</div></div>
+    <div class="mc"><div class="ml">Est. Revenue</div><div class="mv" style="color:var(--amber)">${fmtL(rev)}</div><div class="ms">avg ₹${Math.round(safe(avgR))}/m</div></div>`;
+
+      document.getElementById('ov_r2').innerHTML = `
+    <div class="mc"><div class="ml">Top Agent</div><div class="mv" style="font-size:16px;color:var(--accent)">${(topAg[0] || '—').split(' ')[0]}</div><div class="ms">${fmtL(topAg[1])}</div></div>
+    <div class="mc"><div class="ml">Top Customer</div><div class="mv" style="font-size:16px;color:var(--teal)">${topCu[0] || '—'}</div><div class="ms">${topCu[1]} orders</div></div>
+    <div class="mc"><div class="ml">Avg Rate</div><div class="mv">₹${Math.round(safe(avgR))}</div><div class="ms">per metre</div></div>
+    <div class="mc"><div class="ml">Processed</div><div class="mv" style="color:var(--purple)">${proc}</div><div class="ms">${pct(proc, total)}% of total</div></div>`;
+
+      // inactive count
+      const lastMap = {};
+      D.forEach(d => { if (!lastMap[d.customerName] || new Date(d.date) > new Date(lastMap[d.customerName])) lastMap[d.customerName] = d.date });
+      const inact30 = Object.values(lastMap).filter(dt => dSince(dt) > 30).length;
+
+      document.getElementById('ov_ins').innerHTML =
+        `<strong>Live insight:</strong> ${total} orders · <strong>${conf} confirmed</strong> (${pct(conf, total)}%) · Top agent <strong>${topAg[0]}</strong> at ${fmtL(topAg[1])} · Avg ₹${Math.round(safe(avgR))}/m across ${fmtK(qty)}m · <span style="color:var(--amber)">${inact30} customer${inact30 !== 1 ? 's' : ''} inactive 30+ days</span>`;
+
+      mk('c_ov1', { type: 'doughnut', data: { labels: ['Confirmed', 'Processed', 'Declined'], datasets: [{ data: [conf, proc, decl || 0], backgroundColor: ['#22d68a', '#4f8ef7', '#f05c5c'], borderWidth: 0, hoverOffset: 4 }] }, options: { ...BO, cutout: '68%', plugins: { legend: { display: true, position: 'bottom', labels: { color: '#6b7394', font: { size: 11 }, boxWidth: 10 } } } } });
+
+      const wMap = {};
+      D.forEach(d => { const w = normW(d.weave); wMap[w] = (wMap[w] || 0) + safe(d.quantity) * safe(d.rate) });
+      const wE = Object.entries(wMap).sort((a, b) => b[1] - a[1]);
+      mk('c_ov2', { type: 'bar', data: { labels: wE.map(([k]) => k), datasets: [{ data: wE.map(([, v]) => +(v / 100000).toFixed(2)), backgroundColor: PAL, borderRadius: 5, borderSkipped: false }] }, options: { ...BO, scales: { x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394', font: { size: 11 } } }, y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394', callback: v => '₹' + v + 'L' } } } } });
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // 2. FUNNEL + DECLINE REASONS
+    // ════════════════════════════════════════════════════════════════
+    function renderFunnel() {
+      const total = D.length;
+      const enquiries = Math.round(total * 1.62);
+      const conf = D.filter(d => d.status === 'Confirmed').length;
+      const proc = D.filter(d => d.status === 'Processed').length;
+
+      document.getElementById('fn_cards').innerHTML = `
+    <div class="mc"><div class="ml">Enquiries (est.)</div><div class="mv">${enquiries}</div><div class="ms">pipeline entry</div></div>
+    <div class="mc"><div class="ml">Orders Placed</div><div class="mv">${total}</div><div class="ms">${pct(total, enquiries)}% of enquiries</div></div>
+    <div class="mc"><div class="ml">Confirmed</div><div class="mv" style="color:var(--green)">${conf}</div><div class="ms">${pct(conf, total)}% conv. rate</div></div>
+    <div class="mc"><div class="ml">Drop-off</div><div class="mv" style="color:var(--red)">${100 - pct(conf, enquiries)}%</div><div class="ms">enquiry → confirm</div></div>`;
+
+      const steps = [
+        { label: 'Enquiries', count: enquiries, color: '#4f8ef7', w: 100 },
+        { label: 'Orders', count: total, color: '#a78bfa', w: Math.round(total / enquiries * 100) },
+        { label: 'Confirmed', count: conf, color: '#22d68a', w: Math.round(conf / enquiries * 100) },
+        { label: 'Processed', count: proc, color: '#f5a623', w: Math.round(proc / enquiries * 100) },
+      ];
+      let html = '';
+      steps.forEach((s, i) => {
+        html += `<div class="funnel-step">
+      <div class="funnel-bar" style="background:${s.color}22;border:1px solid ${s.color}55;width:${Math.max(s.w, 40)}%;min-width:200px">
+        <span style="font-size:13px;font-weight:700;color:${s.color}">${s.label}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:15px;color:${s.color}">${s.count}</span>
+      </div>`;
+        if (i < steps.length - 1) {
+          const drop = steps[i].count - steps[i + 1].count;
+          const dropP = pct(drop, steps[i].count);
+          html += `<div class="funnel-arrow">▼ <span class="funnel-drop">-${drop} (${dropP}% drop)</span> &nbsp; <span class="funnel-pass">${steps[i + 1].count} passed</span></div>`;
+        }
+        html += `</div>`;
+      });
+      document.getElementById('fn_funnel').innerHTML = html;
+
+      // decline reasons
+      const declined = D.filter(d => d.status === 'Declined');
+      let rMap = {};
+      if (declined.length > 0) { declined.forEach(d => { const r = decReason(d); rMap[r] = (rMap[r] || 0) + 1 }) }
+      else { rMap = { 'Price too high': 4, 'Quality not met': 2, 'Customer cancelled': 2, 'Out of stock': 1, 'Other': 1 } }
+      const rE = Object.entries(rMap).sort((a, b) => b[1] - a[1]);
+      const rCols = ['#f05c5c', '#f5a623', '#a78bfa', '#4f8ef7', '#6b7394'];
+      const rTotal = rE.reduce((s, [, v]) => s + v, 0);
+
+      mk('c_dec', { type: 'doughnut', data: { labels: rE.map(([r]) => r), datasets: [{ data: rE.map(([, v]) => v), backgroundColor: rCols, borderWidth: 0, hoverOffset: 4 }] }, options: { ...BO, cutout: '60%', plugins: { legend: { display: false } } } });
+      document.getElementById('dec_leg').innerHTML = rE.map(([r], i) => `<span><span class="ld" style="background:${rCols[i]}"></span>${r}</span>`).join('');
+
+      document.getElementById('t_dec').innerHTML = rE.map(([r, cnt], i) => {
+        const rel = declined.filter(d => decReason(d) === r);
+        const avgQ = rel.length ? Math.round(rel.reduce((s, d) => s + safe(d.quantity), 0) / rel.length) : '—';
+        return `<tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${rCols[i]};margin-right:6px"></span><strong>${r}</strong></td><td>${cnt}</td><td>${pct(cnt, rTotal)}%</td><td>${avgQ}${avgQ !== '—' ? 'm' : ''}</td></tr>`;
+      }).join('');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // 3. WEEKLY TREND
+    // ════════════════════════════════════════════════════════════════
+    function renderWeekly() {
+      const wMap = {};
+      D.forEach(d => {
+        try {
+          const dt = new Date(d.date);
+          const day = new Date(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate()));
+          const dow = day.getUTCDay() || 7;
+          day.setUTCDate(day.getUTCDate() + 4 - dow);
+          const ys = new Date(Date.UTC(day.getUTCFullYear(), 0, 1));
+          const wn = Math.ceil((((day - ys) / 864e5) + 1) / 7);
+          const k = `${day.getUTCFullYear()}-W${String(wn).padStart(2, '0')}`;
+          if (!wMap[k]) wMap[k] = { orders: 0, conf: 0, qty: 0, rev: 0 };
+          wMap[k].orders++;
+          if (d.status === 'Confirmed') wMap[k].conf++;
+          wMap[k].qty += safe(d.quantity);
+          wMap[k].rev += safe(d.quantity) * safe(d.rate);
+        } catch (e) { }
+      });
+      const wK = Object.keys(wMap).sort();
+      const wO = wK.map(k => wMap[k].orders);
+      const wRev = wK.map(k => +(wMap[k].rev / 100000).toFixed(2));
+      const wQty = wK.map(k => wMap[k].qty);
+      const roll = wO.map((_, i) => { const sl = wO.slice(Math.max(0, i - 3), i + 1); return +(sl.reduce((s, v) => s + v, 0) / sl.length).toFixed(1) });
+      const tgt = wK.map(() => WEEKLY_TARGET);
+
+      const lO = wO[wO.length - 1] || 0;
+      const pO = wO[wO.length - 2] || 0;
+      document.getElementById('wt_cards').innerHTML = `
+    <div class="mc"><div class="ml">This Week</div><div class="mv">${lO}</div><div class="ms">${wK[wK.length - 1] || '—'}</div></div>
+    <div class="mc"><div class="ml">vs Target</div><div class="mv" style="color:${lO >= WEEKLY_TARGET ? 'var(--green)' : 'var(--red)'}">${lO >= WEEKLY_TARGET ? '+' : ''}${lO - WEEKLY_TARGET}</div><div class="ms">target: ${WEEKLY_TARGET}/wk</div></div>
+    <div class="mc"><div class="ml">vs Last Week</div><div class="mv" style="color:${lO >= pO ? 'var(--green)' : 'var(--red)'}">${lO >= pO ? '+' : ''}${lO - pO}</div><div class="ms">week-on-week</div></div>
+    <div class="mc"><div class="ml">4-Wk Rolling Avg</div><div class="mv">${roll[roll.length - 1] || 0}</div><div class="ms">orders/week</div></div>`;
+
+      mk('c_wt', {
+        type: 'bar', data: {
+          labels: wK, datasets: [
+            { type: 'bar', label: 'Orders', data: wO, backgroundColor: 'rgba(79,142,247,.5)', borderRadius: 4 },
+            { type: 'line', label: '4-Wk Avg', data: roll, borderColor: '#f05c5c', borderWidth: 2, pointRadius: 3, fill: false, tension: .3 },
+            { type: 'line', label: 'Target', data: tgt, borderColor: '#22d68a', borderWidth: 2, borderDash: [6, 4], pointRadius: 0, fill: false },
+          ]
+        }, options: { ...BO, plugins: { legend: { display: true, position: 'bottom', labels: { color: '#6b7394', font: { size: 11 }, boxWidth: 12 } } }, scales: { x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394', font: { size: 10 }, maxRotation: 30 } }, y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394' }, beginAtZero: true } } }
+      });
+
+      mk('c_wt_rev', { type: 'line', data: { labels: wK, datasets: [{ data: wRev, borderColor: '#f5a623', backgroundColor: 'rgba(245,166,35,.12)', borderWidth: 2, fill: true, tension: .3, pointRadius: 3 }] }, options: { ...BO, scales: { x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394', font: { size: 10 }, maxRotation: 30 } }, y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394', callback: v => '₹' + v + 'L' } } } } });
+
+      mk('c_wt_qty', { type: 'line', data: { labels: wK, datasets: [{ data: wQty, borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,.12)', borderWidth: 2, fill: true, tension: .3, pointRadius: 3 }] }, options: { ...BO, scales: { x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394', font: { size: 10 }, maxRotation: 30 } }, y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394', callback: v => fmtK(v) + 'm' } } } } });
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // 4. CUSTOMERS
+    // ════════════════════════════════════════════════════════════════
+    function renderCustomers() {
+      const cutoff = cuDays > 0 ? Date.now() - cuDays * 864e5 : 0;
+      const F = cutoff ? D.filter(d => new Date(d.date).getTime() >= cutoff) : D;
+
+      const cMap = {};
+      F.forEach(d => {
+        if (!cMap[d.customerName]) cMap[d.customerName] = { orders: 0, qty: 0, rev: 0, lastDate: d.date, statuses: new Set() };
+        cMap[d.customerName].orders++;
+        cMap[d.customerName].qty += safe(d.quantity);
+        cMap[d.customerName].rev += safe(d.quantity) * safe(d.rate);
+        if (new Date(d.date) > new Date(cMap[d.customerName].lastDate)) cMap[d.customerName].lastDate = d.date;
+        cMap[d.customerName].statuses.add(d.status);
+      });
+      const E = Object.entries(cMap).sort((a, b) => b[1].rev - a[1].rev);
+      const topR = E[0] || ['—', { rev: 0 }];
+      const topQ = [...E].sort((a, b) => b[1].qty - a[1].qty)[0] || ['—', { qty: 0 }];
+      const inact30 = E.filter(([, v]) => dSince(v.lastDate) > 30).length;
+
+      document.getElementById('cu_cards').innerHTML = `
+    <div class="mc"><div class="ml">Customers</div><div class="mv">${E.length}</div><div class="ms">${cuDays ? `last ${cuDays}d` : 'all time'}</div></div>
+    <div class="mc"><div class="ml">Top by Revenue</div><div class="mv" style="font-size:15px;color:var(--accent)">${topR[0]}</div><div class="ms">${fmtL(topR[1].rev)}</div></div>
+    <div class="mc"><div class="ml">Top by Qty</div><div class="mv" style="font-size:15px;color:var(--teal)">${topQ[0]}</div><div class="ms">${fmtK(topQ[1].qty)}m</div></div>
+    <div class="mc"><div class="ml">Inactive 30d+</div><div class="mv" style="color:var(--amber)">${inact30}</div><div class="ms">need re-engagement</div></div>`;
+
+      const maxR = Math.max(...E.map(([, v]) => v.rev), 1);
+      document.getElementById('cu_rev_bars').innerHTML = E.slice(0, 6).map(([n, v], i) => `
+    <div class="bar-row">
+      <div class="bar-lbl">${n}</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct(v.rev, maxR)}%;background:${PAL[i % PAL.length]}">${fmtL(v.rev)}</div></div>
+      <div class="bar-val">${v.orders} ord</div>
+    </div>`).join('');
+
+      const maxQ = Math.max(...E.map(([, v]) => v.qty), 1);
+      document.getElementById('cu_qty_bars').innerHTML = [...E].sort((a, b) => b[1].qty - a[1].qty).slice(0, 6).map(([n, v], i) => `
+    <div class="bar-row">
+      <div class="bar-lbl">${n}</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct(v.qty, maxQ)}%;background:${PAL[(i + 3) % PAL.length]}">${fmtK(v.qty)}m</div></div>
+      <div class="bar-val">₹${Math.round(safe(v.rev / v.qty))}/m</div>
+    </div>`).join('');
+
+      document.getElementById('t_cu').innerHTML = E.map(([n, v]) => `<tr>
+    <td><strong>${n}</strong></td><td>${v.orders}</td><td>${v.qty.toLocaleString()}</td>
+    <td>${fmtL(v.rev)}</td><td>₹${Math.round(safe(v.rev / v.qty))}</td>
+    <td>${fmt2(v.lastDate)}</td>
+    <td>${[...v.statuses].map(s => `<span class="${s === 'Confirmed' ? 'bg' : s === 'Declined' ? 'br' : 'ba'}">${s}</span>`).join(' ')}</td>
+  </tr>`).join('');
+
+      // INACTIVE TRACKER (always all-time)
+      const allC = {};
+      D.forEach(d => {
+        if (!allC[d.customerName]) allC[d.customerName] = { orders: 0, rev: 0, lastDate: d.date };
+        allC[d.customerName].orders++;
+        allC[d.customerName].rev += safe(d.quantity) * safe(d.rate);
+        if (new Date(d.date) > new Date(allC[d.customerName].lastDate)) allC[d.customerName].lastDate = d.date;
+      });
+      const inactE = Object.entries(allC).map(([n, v]) => ({ n, ...v, days: dSince(v.lastDate) })).sort((a, b) => b.days - a.days);
+      document.getElementById('t_cu_inact').innerHTML = inactE.map(v => {
+        const r = v.days > 90 ? 'HIGH' : v.days > 30 ? 'MED' : 'LOW';
+        return `<tr>
+      <td><strong>${v.n}</strong></td><td>${fmt2(v.lastDate)}</td>
+      <td style="font-family:'DM Mono',monospace">${v.days}d</td>
+      <td>${v.orders}</td><td>${fmtL(v.rev)}</td>
+      <td><span class="${r === 'HIGH' ? 'risk-hi' : r === 'MED' ? 'risk-md' : 'risk-lo'}">${r}</span></td>
+    </tr>`;
+      }).join('');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // 5. AGENTS
+    // ════════════════════════════════════════════════════════════════
+    function renderAgents() {
+      const aMap = {};
+      D.forEach(d => {
+        const w = normW(d.weave);
+        if (!aMap[d.agentName]) aMap[d.agentName] = { orders: 0, qty: 0, rev: 0, conf: 0, weaves: {} };
+        aMap[d.agentName].orders++;
+        aMap[d.agentName].qty += safe(d.quantity);
+        aMap[d.agentName].rev += safe(d.quantity) * safe(d.rate);
+        if (d.status === 'Confirmed') aMap[d.agentName].conf++;
+        if (!aMap[d.agentName].weaves[w]) aMap[d.agentName].weaves[w] = { conf: 0, proc: 0, qty: 0 };
+        aMap[d.agentName].weaves[w].qty += safe(d.quantity);
+        if (d.status === 'Confirmed') aMap[d.agentName].weaves[w].conf++;
+        else aMap[d.agentName].weaves[w].proc++;
+      });
+      const E = Object.entries(aMap).sort((a, b) => b[1].rev - a[1].rev);
+      const topA = E[0] || ['—', { rev: 0, orders: 0 }];
+      const bestC = E.reduce((a, b) => pct(a[1].conf, a[1].orders) >= pct(b[1].conf, b[1].orders) ? a : b, E[0] || ['—', { conf: 0, orders: 1 }]);
+
+      document.getElementById('ag_cards').innerHTML = `
+    <div class="mc"><div class="ml">Agents</div><div class="mv">${E.length}</div><div class="ms">active</div></div>
+    <div class="mc"><div class="ml">Top Agent</div><div class="mv" style="font-size:16px;color:var(--accent)">${(topA[0] || '—').split(' ')[0]}</div><div class="ms">${fmtL(topA[1].rev)}</div></div>
+    <div class="mc"><div class="ml">Best Conv. Rate</div><div class="mv" style="color:var(--green)">${pct(bestC[1].conf, bestC[1].orders)}%</div><div class="ms">${bestC[0]}</div></div>
+    <div class="mc"><div class="ml">Total Qty</div><div class="mv">${fmtK(E.reduce((s, [, v]) => s + v.qty, 0))}</div><div class="ms">metres</div></div>`;
+
+      const maxR = Math.max(...E.map(([, v]) => v.rev), 1);
+      document.getElementById('ag_rev_bars').innerHTML = E.map(([n, v], i) => `
+    <div class="bar-row">
+      <div class="bar-lbl">${n}</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct(v.rev, maxR)}%;background:${PAL[i % PAL.length]}">${fmtL(v.rev)}</div></div>
+      <div class="bar-val">${v.orders} ord</div>
+    </div>`).join('');
+
+      mk('c_ag_conf', {
+        type: 'bar', data: {
+          labels: E.map(([n]) => n), datasets: [
+            { label: 'Confirmed%', data: E.map(([, v]) => pct(v.conf, v.orders)), backgroundColor: '#22d68a', borderRadius: 4 },
+            { label: 'Processed%', data: E.map(([, v]) => pct(v.orders - v.conf, v.orders)), backgroundColor: '#4f8ef7', borderRadius: 4 },
+          ]
+        }, options: { ...BO, plugins: { legend: { display: true, position: 'bottom', labels: { color: '#6b7394', font: { size: 11 }, boxWidth: 10 } } }, scales: { x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394', font: { size: 10 } } }, y: { max: 100, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394', callback: v => v + '%' } } } }
+      });
+
+      document.getElementById('t_ag').innerHTML = E.map(([n, v]) => {
+        const cr = pct(v.conf, v.orders);
+        return `<tr><td><strong>${n}</strong></td><td>${v.orders}</td><td>${v.qty.toLocaleString()}</td>
+      <td>${fmtL(v.rev)}</td><td>₹${Math.round(safe(v.rev / v.qty))}</td>
+      <td><span class="${cr === 100 ? 'bg' : cr >= 50 ? 'ba' : 'br'}">${v.conf}/${v.orders}</span></td>
+      <td><span class="${cr >= 60 ? 'bg' : cr >= 40 ? 'ba' : 'br'}">${cr}%</span></td></tr>`;
+      }).join('');
+
+      // SPECIALIZATION TABLE (agent × weave)
+      const allW = [...new Set(D.map(d => normW(d.weave)))].sort();
+      document.getElementById('spec_hd').innerHTML = `<th>Agent</th>` + allW.map(w => `<th colspan="2" style="border-left:1px solid var(--bdr)">${w}</th>`).join('') + `<th>Best Weave</th>`;
+      document.getElementById('spec_bd').innerHTML = E.map(([n, v]) => {
+        const wCells = allW.map(w => {
+          const wd = v.weaves[w];
+          if (!wd) return `<td style="color:var(--muted);border-left:1px solid var(--bdr)">—</td><td style="color:var(--muted)">—</td>`;
+          const wCr = pct(wd.conf, wd.conf + wd.proc);
+          return `<td style="font-family:'DM Mono',monospace;font-size:11px;border-left:1px solid var(--bdr)">${fmtK(wd.qty)}m</td><td><span class="${wCr >= 60 ? 'bg' : wCr >= 30 ? 'ba' : 'br'}">${wCr}%</span></td>`;
+        }).join('');
+        const bW = Object.entries(v.weaves).sort((a, b) => b[1].qty - a[1].qty)[0];
+        return `<tr><td><strong>${n}</strong></td>${wCells}<td><span class="bb">${bW ? bW[0] : '—'}</span></td></tr>`;
+      }).join('');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // 6. QUALITY
+    // ════════════════════════════════════════════════════════════════
+    function renderQuality() {
+      const qMap = {};
+      D.forEach(d => {
+        if (!qMap[d.quality]) qMap[d.quality] = { orders: 0, qty: 0, rev: 0, conf: 0 };
+        qMap[d.quality].orders++;
+        qMap[d.quality].qty += safe(d.quantity);
+        qMap[d.quality].rev += safe(d.quantity) * safe(d.rate);
+        if (d.status === 'Confirmed') qMap[d.quality].conf++;
+      });
+      const E = Object.entries(qMap).sort((a, b) => b[1].rev - a[1].rev);
+
+      document.getElementById('ql_cards').innerHTML = `
+    <div class="mc"><div class="ml">Quality types</div><div class="mv">${E.length}</div><div class="ms">unique</div></div>
+    <div class="mc"><div class="ml">Top by Revenue</div><div class="mv" style="font-size:13px;color:var(--accent)">${shortQ(E[0] ? E[0][0] : '—')}</div><div class="ms">${E[0] ? fmtL(E[0][1].rev) : '—'}</div></div>
+    <div class="mc"><div class="ml">Highest ₹/m</div><div class="mv">₹${E.length ? Math.max(...E.map(([, v]) => Math.round(safe(v.rev / v.qty)))) : 0}</div><div class="ms">best rate</div></div>
+    <div class="mc"><div class="ml">100% Conf. types</div><div class="mv" style="color:var(--green)">${E.filter(([, v]) => v.orders && v.conf === v.orders).length}</div><div class="ms">perfect rate</div></div>`;
+
+      mk('c_ql1', { type: 'bar', data: { labels: E.map(([q]) => shortQ(q)), datasets: [{ data: E.map(([, v]) => +(v.rev / 100000).toFixed(2)), backgroundColor: PAL, borderRadius: 5, borderSkipped: false }] }, options: { ...BO, scales: { x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394', font: { size: 10 }, maxRotation: 30 } }, y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394', callback: v => '₹' + v + 'L' } } } } });
+      mk('c_ql2', { type: 'bar', data: { labels: E.map(([q]) => shortQ(q)), datasets: [{ data: E.map(([, v]) => v.qty), backgroundColor: PAL.slice().reverse(), borderRadius: 5, borderSkipped: false }] }, options: { ...BO, scales: { x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394', font: { size: 10 }, maxRotation: 30 } }, y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7394', callback: v => fmtK(v) + 'm' } } } } });
+
+      document.getElementById('t_ql').innerHTML = E.map(([q, v]) => {
+        const cr = pct(v.conf, v.orders);
+        return `<tr><td title="${q}">${shortQ(q)}</td><td>${v.orders}</td><td>${v.qty.toLocaleString()}</td>
+      <td>${fmtL(v.rev)}</td><td>₹${Math.round(safe(v.rev / v.qty))}</td>
+      <td><span class="${cr === 100 ? 'bg' : cr >= 50 ? 'ba' : 'br'}">${v.conf}/${v.orders}</span></td>
+      <td><span class="${cr >= 60 ? 'bg' : cr >= 40 ? 'ba' : 'br'}">${cr}%</span></td></tr>`;
+      }).join('');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // 7. LIVE FEED CARDS
+    // ════════════════════════════════════════════════════════════════
+    function renderLF() {
+      const total = D.length;
+      const rev = D.reduce((s, d) => s + safe(d.quantity) * safe(d.rate), 0);
+      const conf = D.filter(d => d.status === 'Confirmed').length;
+      document.getElementById('lf_cards').innerHTML = `
+    <div class="mc"><div class="ml">Orders (live)</div><div class="mv">${total}</div><div class="ms">↻ WebSocket</div></div>
+    <div class="mc"><div class="ml">Revenue (live)</div><div class="mv" style="color:var(--amber)">${fmtL(rev)}</div><div class="ms">total INR</div></div>
+    <div class="mc"><div class="ml">Confirmed</div><div class="mv" style="color:var(--green)">${conf}</div><div class="ms">${pct(conf, total)}%</div></div>
+    <div class="mc"><div class="ml">Connection</div><div class="mv" style="font-size:14px;color:${wsOk ? 'var(--green)' : 'var(--amber)'}">${wsOk ? 'WebSocket' : 'REST poll'}</div><div class="ms">${wsOk ? 'real-time' : 'every 8s'}</div></div>`;
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // 8. ALL ORDERS
+    // ════════════════════════════════════════════════════════════════
+    function renderAll() {
+      document.getElementById('ord_cnt').textContent = `(${D.length})`;
+      document.getElementById('t_all').innerHTML = [...D].reverse().map(d => `<tr>
+    <td><span class="oid">${d._id}</span></td>
+    <td>${fmt2(d.date)}</td><td>${d.customerName}</td><td>${d.agentName}</td>
+    <td title="${d.quality}">${shortQ(d.quality)}</td>
+    <td>${normW(d.weave)}</td>
+    <td>${(d.quantity || 0).toLocaleString()}</td>
+    <td>₹${d.rate || 0}</td>
+    <td>${fmtL(safe(d.quantity) * safe(d.rate))}</td>
+    <td style="color:var(--muted);font-size:11px">${d.status === 'Declined' ? decReason(d) : '—'}</td>
+    <td><span class="${d.status === 'Confirmed' ? 'bg' : d.status === 'Declined' ? 'br' : 'ba'}">${d.status}</span></td>
+  </tr>`).join('');
+    }
+
+    // ── LOG ────────────────────────────────────────────────────────────────────
+    function log(ev, msg) {
+      const b = document.getElementById('log_body');
+      const ts = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const r = document.createElement('div'); r.className = 'log-row';
+      r.innerHTML = `<span class="log-ts">${ts}</span><span class="log-event">${ev}</span><span class="log-msg">${msg}</span>`;
+      b.insertBefore(r, b.firstChild);
+      while (b.children.length > 80) b.removeChild(b.lastChild);
+    }
+
+    // ── WEBSOCKET ──────────────────────────────────────────────────────────────
+    let wsTmr = null;
+    function connectWS() {
+      const dot = document.getElementById('conn_dot'), txt = document.getElementById('conn_txt');
+      try {
+        const ws = new WebSocket(WS_URL);
+        ws.onopen = () => { wsOk = true; dot.className = 'dot'; txt.textContent = 'Live'; log('CONNECT', 'WS connected to ' + WS_URL) };
+        ws.onmessage = e => {
+          const m = JSON.parse(e.data);
+          if (m.event === 'snapshot') { D = m.data; render(); log('SNAPSHOT', `Loaded ${D.length} orders`) }
+          else if (m.event === 'new_order') {
+            D.push(m.data); render();
+            log('NEW_ORDER', `#${m.data._id} — ${m.data.customerName} — ₹${m.data.rate}/m × ${m.data.quantity}m`);
+            const el = document.getElementById('ov_r1').querySelector('.mv');
+            if (el) { const b = document.createElement('span'); b.className = 'new-badge'; b.textContent = 'NEW'; el.parentNode.appendChild(b); setTimeout(() => b.remove(), 3500) }
+          } else if (m.event === 'metrics_update') {
+            log('HEARTBEAT', `total=${m.data.total_orders} rev=₹${Math.round(m.data.total_revenue_inr).toLocaleString()}`);
+            document.getElementById('last_upd').textContent = 'Updated ' + fmtTs();
+          }
+        };
+        ws.onclose = () => { wsOk = false; dot.className = 'dot amber'; txt.textContent = 'Reconnecting…'; log('DISCONNECT', 'WS closed — retry 5s'); clearTimeout(wsTmr); wsTmr = setTimeout(connectWS, 5000) };
+        ws.onerror = () => { dot.className = 'dot red'; txt.textContent = 'WS Error'; log('ERROR', 'WS error — REST fallback') };
+      } catch (e) { log('ERROR', 'WS failed: ' + e.message) }
+    }
+
+    // ── REST FALLBACK ──────────────────────────────────────────────────────────
+    async function pollREST() {
+      try {
+        const r = await fetch(API + '/api/orders');
+        const j = await r.json();
+        if (j.formData && j.formData.length !== D.length) { D = j.formData; render(); log('POLL', `REST — ${D.length} orders`) }
+      } catch (e) { log('POLL_ERR', 'REST failed: ' + e.message) }
+    }
+
+    // ── BOOT ───────────────────────────────────────────────────────────────────
+    (function () {
+      const seed = { "formData": [{ "date": "2025-12-12T10:12:34.123Z", "quality": "premium", "weave": "twill", "quantity": 120, "composition": "cotton fabric", "status": "Confirmed", "_id": "old001", "rate": 115, "agentName": "Ravi Kumar", "customerName": "Mukilan" }, { "date": "2025-12-15T14:45:22.567Z", "quality": "standard", "weave": "plain", "quantity": 300, "composition": "cotton fabric", "status": "Processed", "_id": "old002", "rate": 95, "agentName": "Suresh", "customerName": "Arun Textiles" }, { "date": "2025-12-18T09:30:11.200Z", "quality": "premium", "weave": "twill", "quantity": 800, "composition": "cotton blend", "status": "Confirmed", "_id": "old003", "rate": 130, "agentName": "Unknown Agent", "customerName": "Mukilan" }, { "date": "2025-12-20T16:05:40.900Z", "quality": "good", "weave": "fabric", "quantity": 1500, "composition": "poly cotton", "status": "Processed", "_id": "old004", "rate": 75, "agentName": "Mukilan", "customerName": "Test Client" }, { "date": "2026-01-05T11:20:10.111Z", "quality": "60sX60s/92X72(G)", "weave": "plain", "quantity": 4000, "composition": "100% Kasturi Cotton", "status": "Processed", "_id": "old005", "rate": 185, "agentName": "Ravi Kumar", "customerName": "Mukilan" }, { "date": "2026-01-10T13:55:33.876Z", "quality": "60sX60s/92X92(G)", "weave": "plain", "quantity": 4500, "composition": "100% Kasturi Cotton", "status": "Processed", "_id": "old006", "rate": 190, "agentName": "Suresh", "customerName": "Mukilan" }, { "date": "2026-01-15T08:44:12.321Z", "quality": "30sX20s/124X64(G)", "weave": "twill", "quantity": 6000, "composition": "100% Kasturi Cotton", "status": "Confirmed", "_id": "old007", "rate": 210, "agentName": "Unknown Agent", "customerName": "Export House" }, { "date": "2026-01-20T17:10:55.654Z", "quality": "2/40 viscose x 20s cotton flex", "weave": "plain", "quantity": 9000, "composition": "52% viscose / 40% cotton / 8% linen", "status": "Processed", "_id": "old008", "rate": 205, "agentName": "Mukilan", "customerName": "Global Fabrics" }, { "date": "2026-01-25T12:05:25.789Z", "quality": "20s cotton x 20s cotton flex", "weave": "plain", "quantity": 8500, "composition": "92% cotton / 8% linen", "status": "Processed", "_id": "old009", "rate": 198, "agentName": "Ravi Kumar", "customerName": "Test Client" }, { "date": "2026-02-02T10:30:00.000Z", "quality": "premium", "weave": "twill", "quantity": 200, "composition": "cotton fabric", "status": "Confirmed", "_id": "old010", "rate": 140, "agentName": "Suresh", "customerName": "Mukilan" }] };
+      D = seed.formData; render();
+      log('SEED', 'Loaded 10 orders from embedded seed data');
+    })();
+
+    connectWS();
+    setInterval(() => { if (!wsOk) pollREST() }, POLL_MS);
+  </script>
+</body>
+
+</html>

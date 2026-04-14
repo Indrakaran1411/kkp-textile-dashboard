@@ -1,0 +1,126 @@
+{
+  "status": 200,
+  "message": "Form data fetched successfully",
+  "formData": [
+    {
+      "date": "2025-12-12T10:12:34.123Z",
+      "quality": "premium",
+      "weave": "twill",
+      "quantity": 120,
+      "composition": "cotton fabric",
+      "status": "Confirmed",
+      "_id": "old001",
+      "rate": 115,
+      "agentName": "Ravi Kumar",
+      "customerName": "Mukilan"
+    },
+    {
+      "date": "2025-12-15T14:45:22.567Z",
+      "quality": "standard",
+      "weave": "plain",
+      "quantity": 300,
+      "composition": "cotton fabric",
+      "status": "Processed",
+      "_id": "old002",
+      "rate": 95,
+      "agentName": "Suresh",
+      "customerName": "Arun Textiles"
+    },
+    {
+      "date": "2025-12-18T09:30:11.200Z",
+      "quality": "premium",
+      "weave": "twill",
+      "quantity": 800,
+      "composition": "cotton blend",
+      "status": "Confirmed",
+      "_id": "old003",
+      "rate": 130,
+      "agentName": "Unknown Agent",
+      "customerName": "Mukilan"
+    },
+    {
+      "date": "2025-12-20T16:05:40.900Z",
+      "quality": "good",
+      "weave": "fabric",
+      "quantity": 1500,
+      "composition": "poly cotton",
+      "status": "Processed",
+      "_id": "old004",
+      "rate": 75,
+      "agentName": "Mukilan",
+      "customerName": "Test Client"
+    },
+    {
+      "date": "2026-01-05T11:20:10.111Z",
+      "quality": "60sX60s/92X72(G)",
+      "weave": "plain",
+      "quantity": 4000,
+      "composition": "100% Kasturi Cotton",
+      "status": "Processed",
+      "_id": "old005",
+      "rate": 185,
+      "agentName": "Ravi Kumar",
+      "customerName": "Mukilan"
+    },
+    {
+      "date": "2026-01-10T13:55:33.876Z",
+      "quality": "60sX60s/92X92(G)",
+      "weave": "plain",
+      "quantity": 4500,
+      "composition": "100% Kasturi Cotton",
+      "status": "Processed",
+      "_id": "old006",
+      "rate": 190,
+      "agentName": "Suresh",
+      "customerName": "Mukilan"
+    },
+    {
+      "date": "2026-01-15T08:44:12.321Z",
+      "quality": "30sX20s/124X64(G)",
+      "weave": "twill",
+      "quantity": 6000,
+      "composition": "100% Kasturi Cotton",
+      "status": "Confirmed",
+      "_id": "old007",
+      "rate": 210,
+      "agentName": "Unknown Agent",
+      "customerName": "Export House"
+    },
+    {
+      "date": "2026-01-20T17:10:55.654Z",
+      "quality": "2/40 viscose x 20s cotton flex",
+      "weave": "plain",
+      "quantity": 9000,
+      "composition": "52% viscose / 40% cotton / 8% linen",
+      "status": "Processed",
+      "_id": "old008",
+      "rate": 205,
+      "agentName": "Mukilan",
+      "customerName": "Global Fabrics"
+    },
+    {
+      "date": "2026-01-25T12:05:25.789Z",
+      "quality": "20s cotton x 20s cotton flex",
+      "weave": "plain",
+      "quantity": 8500,
+      "composition": "92% cotton / 8% linen",
+      "status": "Processed",
+      "_id": "old009",
+      "rate": 198,
+      "agentName": "Ravi Kumar",
+      "customerName": "Test Client"
+    },
+    {
+      "date": "2026-02-02T10:30:00.000Z",
+      "quality": "premium",
+      "weave": "twill",
+      "quantity": 200,
+      "composition": "cotton fabric",
+      "status": "Confirmed",
+      "_id": "old010",
+      "rate": 140,
+      "agentName": "Suresh",
+      "customerName": "Mukilan"
+    }
+  ]
+}

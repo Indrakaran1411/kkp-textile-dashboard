@@ -1,0 +1,291 @@
+{
+  "id": null,
+  "uid": "textile-main",
+  "title": "Textile Sales — Live Dashboard",
+  "tags": ["textile", "sales"],
+  "timezone": "Asia/Kolkata",
+  "refresh": "5s",
+  "time": { "from": "now-1h", "to": "now" },
+  "schemaVersion": 38,
+  "panels": [
+
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Total Orders",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "datasource": "Prometheus",
+      "targets": [{ "expr": "textile_total_orders", "legendFormat": "Orders" }],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "color": "blue", "value": null }
+            ]
+          }
+        }
+      }
+    },
+
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Confirmed Orders",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "datasource": "Prometheus",
+      "targets": [{ "expr": "textile_confirmed_orders", "legendFormat": "Confirmed" }],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "green" },
+          "thresholds": { "steps": [{ "color": "green", "value": null }] }
+        }
+      }
+    },
+
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Total Revenue (₹)",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "datasource": "Prometheus",
+      "targets": [{ "expr": "textile_total_revenue_inr", "legendFormat": "Revenue" }],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyINR",
+          "color": { "mode": "fixed", "fixedColor": "orange" }
+        }
+      }
+    },
+
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Avg Rate / Metre (₹)",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "datasource": "Prometheus",
+      "targets": [{ "expr": "textile_avg_rate_per_metre", "legendFormat": "₹/m" }],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyINR",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "color": "red",    "value": null },
+              { "color": "yellow", "value": 120 },
+              { "color": "green",  "value": 180 }
+            ]
+          }
+        }
+      }
+    },
+
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Total Orders Over Time",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "textile_total_orders",     "legendFormat": "Total" },
+        { "expr": "textile_confirmed_orders", "legendFormat": "Confirmed" },
+        { "expr": "textile_processed_orders", "legendFormat": "Processed" }
+      ],
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 15 } }
+      }
+    },
+
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Total Quantity (metres) Over Time",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "textile_total_quantity_metres", "legendFormat": "Qty (m)" }
+      ],
+      "options": {
+        "tooltip": { "mode": "single" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": { "lineWidth": 2, "fillOpacity": 20, "gradientMode": "opacity" }
+        }
+      }
+    },
+
+    {
+      "id": 7,
+      "type": "bargauge",
+      "title": "Revenue by Agent (₹)",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "textile_agent_revenue_inr",
+          "legendFormat": "{{agent}}"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "valueMode": "color"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyINR",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+
+    {
+      "id": 8,
+      "type": "bargauge",
+      "title": "Quantity by Customer (metres)",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "textile_customer_quantity_metres",
+          "legendFormat": "{{customer}}"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "horizontal",
+        "displayMode": "gradient"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Revenue Over Time (₹)",
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "textile_total_revenue_inr", "legendFormat": "Total Revenue ₹" }
+      ],
+      "options": {
+        "tooltip": { "mode": "single" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyINR",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 25,
+            "gradientMode": "scheme"
+          },
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+
+    {
+      "id": 10,
+      "type": "gauge",
+      "title": "Confirmation Rate",
+      "gridPos": { "x": 0, "y": 28, "w": 8, "h": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "textile_confirmed_orders / textile_total_orders * 100",
+          "legendFormat": "Conf Rate %"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              { "color": "red",    "value": null },
+              { "color": "yellow", "value": 40 },
+              { "color": "green",  "value": 60 }
+            ]
+          }
+        }
+      }
+    },
+
+    {
+      "id": 11,
+      "type": "stat",
+      "title": "API Uptime",
+      "gridPos": { "x": 8, "y": 28, "w": 8, "h": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "textile_uptime_seconds", "legendFormat": "Uptime" }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "fixed", "fixedColor": "purple" }
+        }
+      }
+    },
+
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "Total Fabric Ordered",
+      "gridPos": { "x": 16, "y": 28, "w": 8, "h": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "textile_total_quantity_metres", "legendFormat": "Metres" }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "fixed", "fixedColor": "semi-dark-blue" }
+        }
+      }
+    }
+
+  ]
+}
